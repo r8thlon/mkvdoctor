@@ -6,6 +6,7 @@ namespace MkvDoctor.UI.ViewModels;
 public class VideoFileModel : INotifyPropertyChanged
 {
     private string _status = "Pending";
+    private string _duration = "Probando...";
     private double _progress;
 
     public string FilePath { get; init; } = string.Empty;
@@ -25,6 +26,12 @@ public class VideoFileModel : INotifyPropertyChanged
                 var b => $"{b / (1024.0 * 1024 * 1024):F2} GB"
             };
         }
+    }
+
+    public string Duration
+    {
+        get => _duration;
+        set { _duration = value; OnPropertyChanged(); }
     }
 
     public string Status

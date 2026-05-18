@@ -19,10 +19,11 @@
     </Border>
 
     <!-- Row 1: File list header -->
-    <Grid Grid.Row="1" ColumnDefinitions="*,90,110" Margin="0,4,0,2">
+    <Grid Grid.Row="1" ColumnDefinitions="*,100,90,110" Margin="0,4,0,2">
       <TextBlock Text="File" FontWeight="Bold" />
-      <TextBlock Grid.Column="1" Text="Size" FontWeight="Bold" HorizontalAlignment="Right" />
-      <TextBlock Grid.Column="2" Text="Status" FontWeight="Bold" HorizontalAlignment="Right" />
+      <TextBlock Grid.Column="1" Text="Duration" FontWeight="Bold" HorizontalAlignment="Right" />
+      <TextBlock Grid.Column="2" Text="Size" FontWeight="Bold" HorizontalAlignment="Right" />
+      <TextBlock Grid.Column="3" Text="Status" FontWeight="Bold" HorizontalAlignment="Right" />
     </Grid>
 
     <!-- Row 2: File list -->
@@ -30,14 +31,17 @@
              BorderThickness="0" Margin="0,0,0,8">
       <ListBox.ItemTemplate>
         <DataTemplate>
-          <Grid ColumnDefinitions="*,90,110" MinHeight="26">
+          <Grid ColumnDefinitions="*,100,90,110" MinHeight="26">
             <TextBlock Text="{Binding FileName}"
                        ToolTip.Tip="{Binding FilePath}"
                        VerticalAlignment="Center" />
-            <TextBlock Grid.Column="1" Text="{Binding FileSize}"
+            <TextBlock Grid.Column="1" Text="{Binding Duration}"
                        HorizontalAlignment="Right"
                        VerticalAlignment="Center" Foreground="#666" />
-            <TextBlock Grid.Column="2" Text="{Binding Status}"
+            <TextBlock Grid.Column="2" Text="{Binding FileSize}"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center" Foreground="#666" />
+            <TextBlock Grid.Column="3" Text="{Binding Status}"
                        HorizontalAlignment="Right"
                        VerticalAlignment="Center" />
             <Grid.ContextFlyout>

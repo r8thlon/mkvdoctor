@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using MkvDoctor.Core.Interfaces;
@@ -77,6 +78,34 @@ public partial class FFmpegService : IFFmpegService
     {
         while (await reader.ReadLineAsync(ct) is { } line)
             yield return line;
+    }
+
+    public async Task<TimeSpan?> ProbeDurationAsync(string filePath, CancellationToken ct = default)
+    {
+        using var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "ffprobe",
+                Arguments = $"-v error -show_entries format=duration -of csv=p=0 \"{filePath}\"",
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            }
+        };
+
+        process.Start();
+        var output = await process.StandardOutput.ReadToEndAsync(ct);
+        await process.WaitForExitAsync(ct);
+
+        if (process.ExitCode != 0 || string.IsNullOrWhiteSpace(output))
+            return null;
+
+        if (double.TryParse(output.Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out var seconds))
+            return TimeSpan.FromSeconds(seconds);
+
+        return null;
     }
 
     [GeneratedRegex(@"(\d{2}):(\d{2}):(\d{2})\.(\d{2})")]

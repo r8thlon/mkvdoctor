@@ -93,10 +93,23 @@ public class MainViewModel : INotifyPropertyChanged
         foreach (var path in paths)
         {
             if (exts.Contains(Path.GetExtension(path)) && Files.All(f => f.FilePath != path))
-                Files.Add(new VideoFileModel { FilePath = path });
+            {
+                var model = new VideoFileModel { FilePath = path };
+                Files.Add(model);
+                _ = ProbeFileDurationAsync(model);
+            }
         }
         ProcessAllCommand.RaiseCanExecuteChanged();
         ClearFilesCommand.RaiseCanExecuteChanged();
+    }
+
+    private static async Task ProbeFileDurationAsync(VideoFileModel model)
+    {
+        var ffmpeg = new FFmpegService();
+        var duration = await ffmpeg.ProbeDurationAsync(model.FilePath);
+        model.Duration = duration.HasValue
+            ? $"{(int)duration.Value.TotalHours:D2}:{duration.Value.Minutes:D2}:{duration.Value.Seconds:D2}"
+            : "N/A";
     }
 
     public void RemoveFileAt(int index)

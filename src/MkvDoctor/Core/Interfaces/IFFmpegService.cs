@@ -5,6 +5,8 @@ public interface IFFmpegService
     IAsyncEnumerable<FFmpegProgress> RunAsync(
         string arguments,
         CancellationToken ct = default);
+
+    Task<TimeSpan?> ProbeDurationAsync(string filePath, CancellationToken ct = default);
 }
 
 public record FFmpegProgress(
