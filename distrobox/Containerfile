@@ -1,0 +1,23 @@
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y wget apt-transport-https && \
+    wget https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
+    dpkg -i packages-microsoft-prod.deb && \
+    apt-get update && \
+    apt-get install -y dotnet-sdk-8.0 && \
+    apt-get install -y \
+        libgl1-mesa-dev \
+        libx11-dev \
+        libxcursor-dev \
+        libxrandr-dev \
+        libxinerama-dev \
+        libxi-dev \
+        libfontconfig-dev \
+        ffmpeg \
+        libice6 \
+        libsm6 \
+        && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace

@@ -1,0 +1,93 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="MkvDoctor.UI.Views.MainWindow"
+        Title="mkvdoctor"
+        Width="780" Height="620"
+        MinWidth="600" MinHeight="500">
+
+  <Grid RowDefinitions="Auto,Auto,*,Auto,Auto,Auto,Auto"
+        Margin="12">
+
+    <!-- Row 0: Drop zone -->
+    <Border x:Name="dropBorder" Grid.Row="0" MinHeight="80" MaxHeight="120"
+            BorderBrush="#ccc" BorderThickness="2" CornerRadius="8" Margin="0,0,0,8"
+            Background="#f5f5f5">
+      <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="6">
+        <TextBlock Text="Drop video files here" FontSize="16" Foreground="#888" />
+        <Button x:Name="addFilesBtn" Content="Add Files" Click="OnAddFilesClick" />
+      </StackPanel>
+    </Border>
+
+    <!-- Row 1: File list header -->
+    <Grid Grid.Row="1" ColumnDefinitions="*,90,110" Margin="0,4,0,2">
+      <TextBlock Text="File" FontWeight="Bold" />
+      <TextBlock Grid.Column="1" Text="Size" FontWeight="Bold" HorizontalAlignment="Right" />
+      <TextBlock Grid.Column="2" Text="Status" FontWeight="Bold" HorizontalAlignment="Right" />
+    </Grid>
+
+    <!-- Row 2: File list -->
+    <ListBox Grid.Row="2" ItemsSource="{Binding Files}"
+             BorderThickness="0" Margin="0,0,0,8">
+      <ListBox.ItemTemplate>
+        <DataTemplate>
+          <Grid ColumnDefinitions="*,90,110" MinHeight="26">
+            <TextBlock Text="{Binding FileName}"
+                       ToolTip.Tip="{Binding FilePath}"
+                       VerticalAlignment="Center" />
+            <TextBlock Grid.Column="1" Text="{Binding FileSize}"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center" Foreground="#666" />
+            <TextBlock Grid.Column="2" Text="{Binding Status}"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center" />
+            <Grid.ContextFlyout>
+              <MenuFlyout>
+                <MenuItem Header="Remove"
+                          Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}, Path=DataContext.RemoveFileCommand}"
+                          CommandParameter="{Binding}" />
+              </MenuFlyout>
+            </Grid.ContextFlyout>
+          </Grid>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
+
+    <!-- Row 3: Controls -->
+    <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,4,0,8" Spacing="6">
+      <TextBlock Text="Operation:" VerticalAlignment="Center" />
+      <ComboBox SelectedIndex="{Binding SelectedOperation}" MinWidth="180">
+        <ComboBoxItem>Fix Duration</ComboBoxItem>
+        <ComboBoxItem>Concatenate</ComboBoxItem>
+        <ComboBoxItem>Convert to MKV</ComboBoxItem>
+      </ComboBox>
+      <TextBlock Text="Output:" VerticalAlignment="Center" Margin="12,0,0,0" />
+      <TextBox Text="{Binding OutputDirectory}" MinWidth="200" VerticalAlignment="Center" />
+      <Button Content="Browse" Click="OnBrowseOutputClick" VerticalAlignment="Center" />
+    </StackPanel>
+
+    <!-- Row 4: Progress -->
+    <Grid Grid.Row="4" ColumnDefinitions="*,50" Margin="0,4">
+      <ProgressBar Value="{Binding OverallProgress}" Minimum="0" Maximum="100" MinHeight="22" />
+      <TextBlock Grid.Column="1" Text="{Binding OverallProgress, StringFormat='{}{0:F0}%'}"
+                 HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" Foreground="#666" />
+    </Grid>
+
+    <!-- Row 5: Action buttons -->
+    <StackPanel Grid.Row="5" Orientation="Horizontal"
+                HorizontalAlignment="Right" Margin="0,8" Spacing="6">
+      <Button Content="Clear Files" Command="{Binding ClearFilesCommand}" />
+      <Button Content="Process All" Command="{Binding ProcessAllCommand}"
+              Background="#0078d4" Foreground="White" FontWeight="Bold" />
+      <Button Content="Cancel" Command="{Binding CancelCommand}" />
+    </StackPanel>
+
+    <!-- Row 6: Log -->
+    <Border Grid.Row="6" BorderBrush="#ccc" BorderThickness="1" CornerRadius="4"
+            MinHeight="80" MaxHeight="130" Padding="6" Margin="0,4,0,0">
+      <ScrollViewer>
+        <TextBlock Text="{Binding GlobalLog}" FontFamily="Consolas" FontSize="11" TextWrapping="Wrap" />
+      </ScrollViewer>
+    </Border>
+
+  </Grid>
+</Window>
