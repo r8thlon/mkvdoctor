@@ -5,12 +5,20 @@ namespace MkvDoctor.UI.ViewModels;
 
 public class VideoFileModel : INotifyPropertyChanged
 {
+    private bool _isSelected = true;
     private string _status = "Pending";
+    private string _statusBackground = "Transparent";
     private string _duration = "Probando...";
     private double _progress;
 
     public string FilePath { get; init; } = string.Empty;
     public string FileName => Path.GetFileName(FilePath);
+
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set { _isSelected = value; OnPropertyChanged(); }
+    }
 
     private long? _cachedSize;
     public string FileSize
@@ -37,7 +45,18 @@ public class VideoFileModel : INotifyPropertyChanged
     public string Status
     {
         get => _status;
-        set { _status = value; OnPropertyChanged(); }
+        set
+        {
+            _status = value;
+            OnPropertyChanged();
+            StatusBackground = value == "Done" ? "#e8f5e9" : "Transparent";
+        }
+    }
+
+    public string StatusBackground
+    {
+        get => _statusBackground;
+        private set { _statusBackground = value; OnPropertyChanged(); }
     }
 
     public double Progress

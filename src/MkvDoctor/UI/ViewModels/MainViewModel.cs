@@ -11,8 +11,8 @@ public class MainViewModel : INotifyPropertyChanged
 {
     private readonly OperationRunner _runner;
     private int _selectedOperation;
-    private string _outputDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
     private bool _isProcessing;
+    private bool _updatingSelectAll;
     private string _globalLog = string.Empty;
     private double _overallProgress;
     private CancellationTokenSource? _cts;
@@ -25,12 +25,6 @@ public class MainViewModel : INotifyPropertyChanged
         set { _selectedOperation = value; OnPropertyChanged(); }
     }
 
-    public string OutputDirectory
-    {
-        get => _outputDirectory;
-        set { _outputDirectory = value; OnPropertyChanged(); }
-    }
-
     public bool IsProcessing
     {
         get => _isProcessing;
@@ -38,13 +32,25 @@ public class MainViewModel : INotifyPropertyChanged
         {
             _isProcessing = value;
             OnPropertyChanged();
-            ProcessAllCommand.RaiseCanExecuteChanged();
+            ProcessCommand.RaiseCanExecuteChanged();
             CancelCommand.RaiseCanExecuteChanged();
             ClearFilesCommand.RaiseCanExecuteChanged();
         }
     }
 
-    public bool CanProcess => !IsProcessing && Files.Count > 0;
+    public bool CanProcess => !IsProcessing && Files.Any(f => f.IsSelected);
+
+    public bool SelectAll => Files.Count > 0 && Files.All(f => f.IsSelected);
+
+    public void ToggleSelectAll()
+    {
+        var newVal = !SelectAll;
+        _updatingSelectAll = true;
+        foreach (var file in Files)
+            file.IsSelected = newVal;
+        _updatingSelectAll = false;
+        OnPropertyChanged(nameof(SelectAll));
+    }
 
     public string GlobalLog
     {
@@ -59,7 +65,7 @@ public class MainViewModel : INotifyPropertyChanged
     }
 
     public RelayCommand AddFilesCommand { get; }
-    public RelayCommand ProcessAllCommand { get; }
+    public RelayCommand ProcessCommand { get; }
     public RelayCommand CancelCommand { get; }
     public RelayCommand ClearFilesCommand { get; }
     public RelayCommand RemoveFileCommand { get; }
@@ -71,7 +77,7 @@ public class MainViewModel : INotifyPropertyChanged
         _runner.FileCompleted += OnFileCompleted;
 
         AddFilesCommand = new RelayCommand(_ => { }, _ => !IsProcessing);
-        ProcessAllCommand = new RelayCommand(_ => ProcessAll(), _ => CanProcess);
+        ProcessCommand = new RelayCommand(_ => Process(), _ => CanProcess);
         CancelCommand = new RelayCommand(_ => Cancel(), _ => IsProcessing);
         ClearFilesCommand = new RelayCommand(_ => ClearFiles(), _ => !IsProcessing && Files.Count > 0);
         RemoveFileCommand = new RelayCommand(p =>
@@ -79,7 +85,7 @@ public class MainViewModel : INotifyPropertyChanged
             if (p is VideoFileModel file)
             {
                 Files.Remove(file);
-                ProcessAllCommand.RaiseCanExecuteChanged();
+                ProcessCommand.RaiseCanExecuteChanged();
                 ClearFilesCommand.RaiseCanExecuteChanged();
             }
         });
@@ -95,11 +101,12 @@ public class MainViewModel : INotifyPropertyChanged
             if (exts.Contains(Path.GetExtension(path)) && Files.All(f => f.FilePath != path))
             {
                 var model = new VideoFileModel { FilePath = path };
+                model.PropertyChanged += OnFilePropertyChanged;
                 Files.Add(model);
                 _ = ProbeFileDurationAsync(model);
             }
         }
-        ProcessAllCommand.RaiseCanExecuteChanged();
+        ProcessCommand.RaiseCanExecuteChanged();
         ClearFilesCommand.RaiseCanExecuteChanged();
     }
 
@@ -117,7 +124,7 @@ public class MainViewModel : INotifyPropertyChanged
         if (index >= 0 && index < Files.Count)
         {
             Files.RemoveAt(index);
-            ProcessAllCommand.RaiseCanExecuteChanged();
+            ProcessCommand.RaiseCanExecuteChanged();
             ClearFilesCommand.RaiseCanExecuteChanged();
         }
     }
@@ -125,13 +132,14 @@ public class MainViewModel : INotifyPropertyChanged
     public void ClearFiles()
     {
         Files.Clear();
-        ProcessAllCommand.RaiseCanExecuteChanged();
+        ProcessCommand.RaiseCanExecuteChanged();
         ClearFilesCommand.RaiseCanExecuteChanged();
     }
 
-    public async void ProcessAll()
+    public async void Process()
     {
-        if (IsProcessing || Files.Count == 0) return;
+        var selectedFiles = Files.Where(f => f.IsSelected).ToList();
+        if (IsProcessing || selectedFiles.Count == 0) return;
 
         IsProcessing = true;
         OverallProgress = 0;
@@ -140,18 +148,14 @@ public class MainViewModel : INotifyPropertyChanged
 
         var operationType = (OperationType)SelectedOperation;
         var operation = OperationFactory.Create(operationType, new FFmpegService());
-        var inputFiles = Files.Select(f => f.FilePath).ToList();
-        var outputDir = OutputDirectory;
-
-        if (!Directory.Exists(outputDir))
-            Directory.CreateDirectory(outputDir);
+        var inputFiles = selectedFiles.Select(f => f.FilePath).ToList();
 
         try
         {
-            var total = Files.Count;
+            var total = selectedFiles.Count;
             var completed = 0;
 
-            await foreach (var result in _runner.RunAsync(operation, inputFiles, outputDir, _cts.Token))
+            await foreach (var result in _runner.RunAsync(operation, inputFiles, _cts.Token))
             {
                 completed++;
                 OverallProgress = (double)completed / total * 100;
@@ -172,6 +176,16 @@ public class MainViewModel : INotifyPropertyChanged
     }
 
     public void Cancel() => _cts?.Cancel();
+
+    private void OnFilePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(VideoFileModel.IsSelected))
+        {
+            ProcessCommand.RaiseCanExecuteChanged();
+            if (!_updatingSelectAll)
+                OnPropertyChanged(nameof(SelectAll));
+        }
+    }
 
     private void OnFileProgress(object? sender, FileProgressEventArgs e)
     {

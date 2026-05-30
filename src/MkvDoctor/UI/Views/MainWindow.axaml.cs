@@ -27,6 +27,11 @@ public partial class MainWindow : Window
         AddHandler(DragDrop.DragLeaveEvent, OnDragLeave);
     }
 
+    private void OnSelectAllClick(object? sender, RoutedEventArgs e)
+    {
+        _viewModel.ToggleSelectAll();
+    }
+
     private async void OnAddFilesClick(object? sender, RoutedEventArgs e)
     {
         var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
@@ -53,17 +58,6 @@ public partial class MainWindow : Window
                 .Select(p => p!)
                 .ToArray();
             _viewModel.AddFiles(paths);
-        }
-    }
-
-    private async void OnBrowseOutputClick(object? sender, RoutedEventArgs e)
-    {
-        var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions());
-        if (folders.Count > 0)
-        {
-            var path = folders[0].TryGetLocalPath();
-            if (path is not null)
-                _viewModel.OutputDirectory = path;
         }
     }
 

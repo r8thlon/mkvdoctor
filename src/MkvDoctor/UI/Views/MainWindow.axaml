@@ -19,11 +19,15 @@
     </Border>
 
     <!-- Row 1: File list header -->
-    <Grid Grid.Row="1" ColumnDefinitions="*,100,90,110" Margin="0,4,0,2">
-      <TextBlock Text="File" FontWeight="Bold" />
-      <TextBlock Grid.Column="1" Text="Duration" FontWeight="Bold" HorizontalAlignment="Right" />
-      <TextBlock Grid.Column="2" Text="Size" FontWeight="Bold" HorizontalAlignment="Right" />
-      <TextBlock Grid.Column="3" Text="Status" FontWeight="Bold" HorizontalAlignment="Right" />
+    <Grid Grid.Row="1" ColumnDefinitions="28,*,100,90,110,30" Margin="0,4,0,2">
+      <CheckBox IsChecked="{Binding SelectAll, Mode=OneWay}"
+                VerticalAlignment="Center" HorizontalAlignment="Center"
+                Click="OnSelectAllClick" />
+      <TextBlock Grid.Column="1" Text="File" FontWeight="Bold" />
+      <TextBlock Grid.Column="2" Text="Duration" FontWeight="Bold" HorizontalAlignment="Right" />
+      <TextBlock Grid.Column="3" Text="Size" FontWeight="Bold" HorizontalAlignment="Right" />
+      <TextBlock Grid.Column="4" Text="Status" FontWeight="Bold" HorizontalAlignment="Right" />
+      <TextBlock Grid.Column="5" Text="Actions" FontWeight="Bold" HorizontalAlignment="Center" />
     </Grid>
 
     <!-- Row 2: File list -->
@@ -31,19 +35,26 @@
              BorderThickness="0" Margin="0,0,0,8">
       <ListBox.ItemTemplate>
         <DataTemplate>
-          <Grid ColumnDefinitions="*,100,90,110" MinHeight="26">
-            <TextBlock Text="{Binding FileName}"
+          <Grid Background="{Binding StatusBackground}"
+                ColumnDefinitions="28,*,100,90,110,30" MinHeight="26">
+            <CheckBox IsChecked="{Binding IsSelected}"
+                      VerticalAlignment="Center"
+                      HorizontalAlignment="Center" />
+            <TextBlock Grid.Column="1" Text="{Binding FileName}"
                        ToolTip.Tip="{Binding FilePath}"
                        VerticalAlignment="Center" />
-            <TextBlock Grid.Column="1" Text="{Binding Duration}"
+            <TextBlock Grid.Column="2" Text="{Binding Duration}"
                        HorizontalAlignment="Right"
                        VerticalAlignment="Center" Foreground="#666" />
-            <TextBlock Grid.Column="2" Text="{Binding FileSize}"
+            <TextBlock Grid.Column="3" Text="{Binding FileSize}"
                        HorizontalAlignment="Right"
                        VerticalAlignment="Center" Foreground="#666" />
-            <TextBlock Grid.Column="3" Text="{Binding Status}"
+            <TextBlock Grid.Column="4" Text="{Binding Status}"
                        HorizontalAlignment="Right"
                        VerticalAlignment="Center" />
+            <Button Grid.Column="5" Content="✕" FontSize="11" Width="22" Height="22" Padding="0"
+                    Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}, Path=DataContext.RemoveFileCommand}"
+                    CommandParameter="{Binding}" />
             <Grid.ContextFlyout>
               <MenuFlyout>
                 <MenuItem Header="Remove"
@@ -64,9 +75,6 @@
         <ComboBoxItem>Concatenate</ComboBoxItem>
         <ComboBoxItem>Convert to MKV</ComboBoxItem>
       </ComboBox>
-      <TextBlock Text="Output:" VerticalAlignment="Center" Margin="12,0,0,0" />
-      <TextBox Text="{Binding OutputDirectory}" MinWidth="200" VerticalAlignment="Center" />
-      <Button Content="Browse" Click="OnBrowseOutputClick" VerticalAlignment="Center" />
     </StackPanel>
 
     <!-- Row 4: Progress -->
@@ -80,7 +88,7 @@
     <StackPanel Grid.Row="5" Orientation="Horizontal"
                 HorizontalAlignment="Right" Margin="0,8" Spacing="6">
       <Button Content="Clear Files" Command="{Binding ClearFilesCommand}" />
-      <Button Content="Process All" Command="{Binding ProcessAllCommand}"
+      <Button Content="Process" Command="{Binding ProcessCommand}"
               Background="#0078d4" Foreground="White" FontWeight="Bold" />
       <Button Content="Cancel" Command="{Binding CancelCommand}" />
     </StackPanel>

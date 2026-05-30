@@ -19,12 +19,14 @@ public class OperationRunner
     public async IAsyncEnumerable<OperationResult> RunAsync(
         IVideoOperation operation,
         IReadOnlyList<string> inputFiles,
-        string outputDirectory,
         [EnumeratorCancellation] CancellationToken ct = default)
     {
         if (operation.CanCombineInputs && inputFiles.Count > 1)
         {
-            var output = Path.Combine(outputDirectory, $"concat_{DateTime.Now:yyyyMMdd_HHmmss}.mkv");
+            var baseDir = Path.GetDirectoryName(inputFiles[0])!;
+            var outputDir = Path.Combine(baseDir, "mkvdoctor-output");
+            Directory.CreateDirectory(outputDir);
+            var output = Path.Combine(outputDir, $"concat_{DateTime.Now:yyyyMMdd_HHmmss}.mkv");
             var result = await RunSingleAsync(operation, inputFiles, output, ct);
             OnFileCompleted(inputFiles, result);
             yield return result;
@@ -33,9 +35,12 @@ public class OperationRunner
 
         foreach (var input in inputFiles)
         {
+            var baseDir = Path.GetDirectoryName(input)!;
+            var outputDir = Path.Combine(baseDir, "mkvdoctor-output");
+            Directory.CreateDirectory(outputDir);
             var ext = operation.OutputExtension;
             var outputName = $"{Path.GetFileNameWithoutExtension(input)}{ext}";
-            var output = Path.Combine(outputDirectory, outputName);
+            var output = Path.Combine(outputDir, outputName);
             var result = await RunSingleAsync(operation, [input], output, ct);
             OnFileCompleted([input], result);
             yield return result;
