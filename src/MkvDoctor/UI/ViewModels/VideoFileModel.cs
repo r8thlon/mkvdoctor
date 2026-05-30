@@ -6,19 +6,63 @@ namespace MkvDoctor.UI.ViewModels;
 public class VideoFileModel : INotifyPropertyChanged
 {
     private bool _isSelected = true;
+    private string _displayName;
     private string _status = "Pending";
     private string _statusBackground = "Transparent";
     private string _duration = "Probando...";
     private double _progress;
+    private string? _outputPath;
 
-    public string FilePath { get; init; } = string.Empty;
-    public string FileName => Path.GetFileName(FilePath);
+    public VideoFileModel(string filePath)
+    {
+        FilePath = filePath;
+        _displayName = Path.GetFileNameWithoutExtension(filePath);
+    }
+
+    public string FilePath { get; private set; }
+
+    public string Extension => Path.GetExtension(FilePath);
+
+    public string FileName
+    {
+        get => _displayName;
+        set
+        {
+            if (value == _displayName) return;
+            var dir = Path.GetDirectoryName(FilePath)!;
+            var ext = Path.GetExtension(FilePath);
+            var newPath = Path.Combine(dir, value + ext);
+            if (!string.Equals(newPath, FilePath, StringComparison.OrdinalIgnoreCase))
+            {
+                File.Move(FilePath, newPath);
+                FilePath = newPath;
+                _cachedSize = null;
+                OnPropertyChanged(nameof(FilePath));
+                OnPropertyChanged(nameof(FileSize));
+            }
+            _displayName = value;
+            OnPropertyChanged();
+        }
+    }
 
     public bool IsSelected
     {
         get => _isSelected;
         set { _isSelected = value; OnPropertyChanged(); }
     }
+
+    public string? OutputPath
+    {
+        get => _outputPath;
+        internal set
+        {
+            _outputPath = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(ShowOpenLocation));
+        }
+    }
+
+    public bool ShowOpenLocation => Status == "Done" && OutputPath != null;
 
     private long? _cachedSize;
     public string FileSize
@@ -50,6 +94,7 @@ public class VideoFileModel : INotifyPropertyChanged
             _status = value;
             OnPropertyChanged();
             StatusBackground = value == "Done" ? "#e8f5e9" : "Transparent";
+            OnPropertyChanged(nameof(ShowOpenLocation));
         }
     }
 

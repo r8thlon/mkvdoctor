@@ -5,96 +5,172 @@
         Width="780" Height="620"
         MinWidth="600" MinHeight="500">
 
-  <Grid RowDefinitions="Auto,Auto,*,Auto,Auto,Auto,Auto"
+  <Grid RowDefinitions="*,Auto,Auto,Auto"
         Margin="12">
 
-    <!-- Row 0: Drop zone -->
-    <Border x:Name="dropBorder" Grid.Row="0" MinHeight="80" MaxHeight="120"
-            BorderBrush="#ccc" BorderThickness="2" CornerRadius="8" Margin="0,0,0,8"
-            Background="#f5f5f5">
-      <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="6">
-        <TextBlock Text="Drop video files here" FontSize="16" Foreground="#888" />
-        <Button x:Name="addFilesBtn" Content="Add Files" Click="OnAddFilesClick" />
-      </StackPanel>
-    </Border>
+    <!-- Row 0: TabControl -->
+    <TabControl SelectedIndex="{Binding SelectedTabIndex}">
 
-    <!-- Row 1: File list header -->
-    <Grid Grid.Row="1" ColumnDefinitions="28,*,100,90,110,30" Margin="0,4,0,2">
-      <CheckBox IsChecked="{Binding SelectAll, Mode=OneWay}"
-                VerticalAlignment="Center" HorizontalAlignment="Center"
-                Click="OnSelectAllClick" />
-      <TextBlock Grid.Column="1" Text="File" FontWeight="Bold" />
-      <TextBlock Grid.Column="2" Text="Duration" FontWeight="Bold" HorizontalAlignment="Right" />
-      <TextBlock Grid.Column="3" Text="Size" FontWeight="Bold" HorizontalAlignment="Right" />
-      <TextBlock Grid.Column="4" Text="Status" FontWeight="Bold" HorizontalAlignment="Right" />
-      <TextBlock Grid.Column="5" Text="Actions" FontWeight="Bold" HorizontalAlignment="Center" />
-    </Grid>
+      <!-- ════ Process tab ════ -->
+      <TabItem Header="Process">
+        <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" Margin="0,6,0,0">
 
-    <!-- Row 2: File list -->
-    <ListBox Grid.Row="2" ItemsSource="{Binding Files}"
-             BorderThickness="0" Margin="0,0,0,8">
-      <ListBox.ItemTemplate>
-        <DataTemplate>
-          <Grid Background="{Binding StatusBackground}"
-                ColumnDefinitions="28,*,100,90,110,30" MinHeight="26">
-            <CheckBox IsChecked="{Binding IsSelected}"
-                      VerticalAlignment="Center"
-                      HorizontalAlignment="Center" />
-            <TextBlock Grid.Column="1" Text="{Binding FileName}"
-                       ToolTip.Tip="{Binding FilePath}"
-                       VerticalAlignment="Center" />
-            <TextBlock Grid.Column="2" Text="{Binding Duration}"
-                       HorizontalAlignment="Right"
-                       VerticalAlignment="Center" Foreground="#666" />
-            <TextBlock Grid.Column="3" Text="{Binding FileSize}"
-                       HorizontalAlignment="Right"
-                       VerticalAlignment="Center" Foreground="#666" />
-            <TextBlock Grid.Column="4" Text="{Binding Status}"
-                       HorizontalAlignment="Right"
-                       VerticalAlignment="Center" />
-            <Button Grid.Column="5" Content="✕" FontSize="11" Width="22" Height="22" Padding="0"
-                    Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}, Path=DataContext.RemoveFileCommand}"
-                    CommandParameter="{Binding}" />
-            <Grid.ContextFlyout>
-              <MenuFlyout>
-                <MenuItem Header="Remove"
-                          Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}, Path=DataContext.RemoveFileCommand}"
-                          CommandParameter="{Binding}" />
-              </MenuFlyout>
-            </Grid.ContextFlyout>
+          <!-- Drop zone -->
+          <Border x:Name="processDropBorder" Grid.Row="0" MinHeight="60" MaxHeight="100"
+                  BorderBrush="#ccc" BorderThickness="2" CornerRadius="8" Margin="0,0,0,6"
+                  Background="#f5f5f5">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="4">
+              <TextBlock Text="Drop video files here" FontSize="14" Foreground="#888" />
+              <Button x:Name="addFilesBtn" Content="Add Files" Click="OnAddFilesClick" />
+            </StackPanel>
+          </Border>
+
+          <!-- Header -->
+          <Grid Grid.Row="1" ColumnDefinitions="28,*,100,90,110,50" Margin="0,2,0,2">
+            <CheckBox IsChecked="{Binding SelectAll, Mode=OneWay}"
+                      VerticalAlignment="Center" HorizontalAlignment="Center"
+                      Click="OnSelectAllClick" />
+            <TextBlock Grid.Column="1" Text="File" FontWeight="Bold" />
+            <TextBlock Grid.Column="2" Text="Duration" FontWeight="Bold" HorizontalAlignment="Right" />
+            <TextBlock Grid.Column="3" Text="Size" FontWeight="Bold" HorizontalAlignment="Right" />
+            <TextBlock Grid.Column="4" Text="Status" FontWeight="Bold" HorizontalAlignment="Right" />
+            <TextBlock Grid.Column="5" Text="Actions" FontWeight="Bold" HorizontalAlignment="Center" />
           </Grid>
-        </DataTemplate>
-      </ListBox.ItemTemplate>
-    </ListBox>
 
-    <!-- Row 3: Controls -->
-    <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,4,0,8" Spacing="6">
-      <TextBlock Text="Operation:" VerticalAlignment="Center" />
-      <ComboBox SelectedIndex="{Binding SelectedOperation}" MinWidth="180">
-        <ComboBoxItem>Fix Duration</ComboBoxItem>
-        <ComboBoxItem>Concatenate</ComboBoxItem>
-        <ComboBoxItem>Convert to MKV</ComboBoxItem>
-      </ComboBox>
-    </StackPanel>
+          <!-- File list -->
+          <ListBox Grid.Row="2" ItemsSource="{Binding Files}"
+                   BorderThickness="0" Margin="0,0,0,6">
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <Grid Background="{Binding StatusBackground}"
+                      ColumnDefinitions="28,*,100,90,110,50" MinHeight="26">
+                  <CheckBox IsChecked="{Binding IsSelected}"
+                            VerticalAlignment="Center" HorizontalAlignment="Center" />
+                  <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Spacing="0">
+                    <TextBox Text="{Binding FileName, UpdateSourceTrigger=PropertyChanged}"
+                             BorderThickness="0" Background="Transparent" />
+                    <TextBlock Text="{Binding Extension}" Foreground="#999" VerticalAlignment="Center" />
+                  </StackPanel>
+                  <TextBlock Grid.Column="2" Text="{Binding Duration}"
+                             HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="#666" />
+                  <TextBlock Grid.Column="3" Text="{Binding FileSize}"
+                             HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="#666" />
+                  <TextBlock Grid.Column="4" Text="{Binding Status}"
+                             HorizontalAlignment="Right" VerticalAlignment="Center" />
+                  <StackPanel Grid.Column="5" Orientation="Horizontal"
+                              HorizontalAlignment="Right" Spacing="2">
+                    <Button Content="📂" Width="22" Height="22" FontSize="11" Padding="0"
+                            IsVisible="{Binding ShowOpenLocation}"
+                            Click="OnProcessOpenLocationClick" CommandParameter="{Binding}" />
+                    <Button Content="✕" Width="22" Height="22" FontSize="11" Padding="0"
+                            Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}, Path=DataContext.RemoveFileCommand}"
+                            CommandParameter="{Binding}" />
+                  </StackPanel>
+                </Grid>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
 
-    <!-- Row 4: Progress -->
-    <Grid Grid.Row="4" ColumnDefinitions="*,50" Margin="0,4">
+          <!-- Operation -->
+          <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,6" Spacing="6">
+            <TextBlock Text="Operation:" VerticalAlignment="Center" />
+            <ComboBox SelectedIndex="{Binding SelectedOperation}" MinWidth="160">
+              <ComboBoxItem>Fix Duration</ComboBoxItem>
+              <ComboBoxItem>Convert to MKV</ComboBoxItem>
+            </ComboBox>
+          </StackPanel>
+
+          <!-- Action buttons -->
+          <StackPanel Grid.Row="4" Orientation="Horizontal"
+                      HorizontalAlignment="Right" Spacing="6">
+            <Button Content="Clear Files" Command="{Binding ClearFilesCommand}" />
+            <Button Content="Process" Command="{Binding ProcessCommand}"
+                    Background="#0078d4" Foreground="White" FontWeight="Bold" />
+          </StackPanel>
+
+        </Grid>
+      </TabItem>
+
+      <!-- ════ Mix tab ════ -->
+      <TabItem Header="Mix">
+        <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" Margin="0,6,0,0">
+
+          <!-- Drop zone -->
+          <Border x:Name="mixDropBorder" Grid.Row="0" MinHeight="60" MaxHeight="100"
+                  BorderBrush="#ccc" BorderThickness="2" CornerRadius="8" Margin="0,0,0,6"
+                  Background="#f5f5f5">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="4">
+              <TextBlock Text="Drop video files here (concatenation order)" FontSize="14" Foreground="#888" />
+              <Button x:Name="mixAddFilesBtn" Content="Add Files" Click="OnMixAddFilesClick" />
+            </StackPanel>
+          </Border>
+
+          <!-- Header -->
+          <Grid Grid.Row="1" ColumnDefinitions="*,100,90,50" Margin="0,2,0,2">
+            <TextBlock Text="File" FontWeight="Bold" />
+            <TextBlock Grid.Column="1" Text="Duration" FontWeight="Bold" HorizontalAlignment="Right" />
+            <TextBlock Grid.Column="2" Text="Size" FontWeight="Bold" HorizontalAlignment="Right" />
+            <TextBlock Grid.Column="3" Text="Actions" FontWeight="Bold" HorizontalAlignment="Center" />
+          </Grid>
+
+          <!-- File list (DnD reorder) -->
+          <ListBox x:Name="mixListBox" Grid.Row="2"
+                   ItemsSource="{Binding MixFiles}"
+                   BorderThickness="0" Margin="0,0,0,6"
+                   DragDrop.DragOver="OnMixListDragOver"
+                   DragDrop.Drop="OnMixListDrop">
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <Grid ColumnDefinitions="*,100,90,50" MinHeight="26"
+                      PointerPressed="OnMixItemPointerPressed">
+                  <TextBlock Text="{Binding FileName}" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="1" Text="{Binding Duration}"
+                             HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="#666" />
+                  <TextBlock Grid.Column="2" Text="{Binding FileSize}"
+                             HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="#666" />
+                  <StackPanel Grid.Column="3" Orientation="Horizontal"
+                              HorizontalAlignment="Right" Spacing="2">
+                    <Button Content="✕" Width="22" Height="22" FontSize="11" Padding="0"
+                            Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}, Path=DataContext.MixRemoveFileCommand}"
+                            CommandParameter="{Binding}" />
+                  </StackPanel>
+                </Grid>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+
+          <!-- Action buttons -->
+          <StackPanel Grid.Row="3" Orientation="Horizontal"
+                      HorizontalAlignment="Right" Spacing="6">
+            <Button Content="Clear Files" Command="{Binding MixClearCommand}" />
+            <Button Content="Mix" Command="{Binding MixCommand}"
+                    Background="#0078d4" Foreground="White" FontWeight="Bold" />
+          </StackPanel>
+
+          <!-- Open folder after mix -->
+          <Button Grid.Row="4" Content="Abrir carpeta"
+                  IsVisible="{Binding HasMixOutput}"
+                  Click="OnMixOpenFolderClick"
+                  Margin="0,4,0,0" />
+
+        </Grid>
+      </TabItem>
+
+    </TabControl>
+
+    <!-- Row 1: Progress bar -->
+    <Grid Grid.Row="1" ColumnDefinitions="*,50" Margin="0,4">
       <ProgressBar Value="{Binding OverallProgress}" Minimum="0" Maximum="100" MinHeight="22" />
       <TextBlock Grid.Column="1" Text="{Binding OverallProgress, StringFormat='{}{0:F0}%'}"
                  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" Foreground="#666" />
     </Grid>
 
-    <!-- Row 5: Action buttons -->
-    <StackPanel Grid.Row="5" Orientation="Horizontal"
-                HorizontalAlignment="Right" Margin="0,8" Spacing="6">
-      <Button Content="Clear Files" Command="{Binding ClearFilesCommand}" />
-      <Button Content="Process" Command="{Binding ProcessCommand}"
-              Background="#0078d4" Foreground="White" FontWeight="Bold" />
-      <Button Content="Cancel" Command="{Binding CancelCommand}" />
-    </StackPanel>
+    <!-- Row 2: Cancel button -->
+    <Button Grid.Row="2" Content="Cancel" Command="{Binding CancelCommand}"
+            HorizontalAlignment="Right" Margin="0,4" />
 
-    <!-- Row 6: Log -->
-    <Border Grid.Row="6" BorderBrush="#ccc" BorderThickness="1" CornerRadius="4"
+    <!-- Row 3: Log -->
+    <Border Grid.Row="3" BorderBrush="#ccc" BorderThickness="1" CornerRadius="4"
             MinHeight="80" MaxHeight="130" Padding="6" Margin="0,4,0,0">
       <ScrollViewer>
         <TextBlock Text="{Binding GlobalLog}" FontFamily="Consolas" FontSize="11" TextWrapping="Wrap" />
