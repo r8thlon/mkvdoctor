@@ -9,7 +9,7 @@ mkvdoctor is a cross-platform desktop GUI for fixing corrupted video duration me
 - **Language**: C# (.NET 8)
 - **UI framework**: Avalonia 11.3.13
 - **Video engine**: ffmpeg (installed in container)
-- **Build/runtime**: Distrobox (Ubuntu 24.04 container via Podman)
+- **Build/runtime**: Docker + Distrobox (Ubuntu 24.04 container)
 - **Build system**: Make
 
 ## Project structure
@@ -43,11 +43,11 @@ mkvdoctor/
 ## Build commands
 
 ```bash
-make setup      # first time — builds container + creates distrobox
+make setup      # first time — builds docker container + creates distrobox
 make build      # compile only
 make run        # compile + launch GUI
 make clean      # clean build artifacts
-make rebuild    # distrobox rm && make setup
+make rebuild    # distrobox rm + docker rmi && make setup
 ```
 
 ## FFmpeg operations
@@ -67,6 +67,7 @@ make rebuild    # distrobox rm && make setup
 
 ## Container details
 
+- Runtime: Docker (via distrobox)
 - Image: Ubuntu 24.04
 - User: same UID/GID as host (distrobox default)
 - Home: host home mounted at same path

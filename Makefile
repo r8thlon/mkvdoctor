@@ -8,26 +8,22 @@ HOST_PROJECT := $(shell pwd)
 all: build
 
 setup:
-	podman build -t $(IMAGE_NAME) -f distrobox/Containerfile
-	-distrobox create --name $(CONTAINER) --image $(IMAGE_NAME)
+	docker build -t $(IMAGE_NAME) -f distrobox/Containerfile .
+	-DBX_CONTAINER_MANAGER=docker distrobox create --name $(CONTAINER) --image $(IMAGE_NAME)
 
-ensure-running:
-	@podman start $(CONTAINER) 2>/dev/null || true
-	@sleep 1
+build:
+	distrobox enter --name $(CONTAINER) --no-workdir -- dotnet build $(HOST_PROJECT)/$(PROJECT_DIR)
 
-build: ensure-running
-	podman exec -w $(HOST_PROJECT) $(CONTAINER) dotnet build $(PROJECT_DIR)
+run:
+	distrobox enter --name $(CONTAINER) --no-workdir -- dotnet run --project $(HOST_PROJECT)/$(PROJECT_DIR)
 
-run: ensure-running
-	podman exec -e DISPLAY=$(DISPLAY) -e WAYLAND_DISPLAY=$(WAYLAND_DISPLAY) -e XAUTHORITY=$(XAUTHORITY) -w $(HOST_PROJECT) $(CONTAINER) dotnet run --project $(PROJECT_DIR)
-
-clean: ensure-running
-	podman exec -w $(HOST_PROJECT) $(CONTAINER) dotnet clean $(PROJECT_DIR)
+clean:
+	distrobox enter --name $(CONTAINER) --no-workdir -- dotnet clean $(HOST_PROJECT)/$(PROJECT_DIR)
 
 shell:
-	distrobox enter $(CONTAINER)
+	DBX_CONTAINER_MANAGER=docker distrobox enter $(CONTAINER)
 
 rebuild: clean
-	-distrobox rm --force $(CONTAINER)
-	-podman rmi $(IMAGE_NAME)
+	-DBX_CONTAINER_MANAGER=docker distrobox rm --force $(CONTAINER)
+	-docker rmi $(IMAGE_NAME)
 	$(MAKE) setup

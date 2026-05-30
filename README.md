@@ -6,14 +6,14 @@ Built with **C# .NET 8** + **Avalonia UI**, all within a **Distrobox** container
 
 ## Requirements
 
-- **Podman** (or Docker with Distrobox)
+- **Docker** + **Distrobox**
 - **ffmpeg** on the host
 - Make
 
 ## Quick start
 
 ```bash
-make setup    # build container image + create distrobox (first time only)
+make setup    # build docker image + create distrobox (first time only)
 make run      # build and launch the GUI
 ```
 
@@ -61,7 +61,7 @@ src/MkvDoctor/
 ## Commands
 
 ```bash
-make setup      # build container + create distrobox
+make setup      # build docker container + create distrobox
 make build      # compile
 make run        # compile + launch GUI
 make clean      # clean artifacts
