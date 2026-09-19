@@ -77,6 +77,7 @@
             <ComboBox SelectedIndex="{Binding SelectedOperation}" MinWidth="160">
               <ComboBoxItem>Fix Duration</ComboBoxItem>
               <ComboBoxItem>Convert to MKV</ComboBoxItem>
+              <ComboBoxItem>Mute Video</ComboBoxItem>
             </ComboBox>
           </StackPanel>
 
